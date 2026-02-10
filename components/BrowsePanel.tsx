@@ -18,19 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { BrowseMode } from "@/types/steam";
-
-const STEAM_GENRES = [
-  "Action", "Adventure", "Casual", "Early Access", "Free to Play",
-  "Indie", "Massively Multiplayer", "RPG", "Racing", "Simulation",
-  "Sports", "Strategy",
-];
-
-const COMMON_TAGS = [
-  "Singleplayer", "Multiplayer", "Co-op", "Open World", "Survival",
-  "Sandbox", "VR", "FPS", "Third Person", "Puzzle", "Platformer",
-  "Horror", "Roguelike", "Turn-Based", "Story Rich", "Atmospheric",
-  "Sci-fi", "Fantasy", "Building", "Anime",
-];
+import { STEAM_GENRES, COMMON_TAGS } from "@/lib/constants";
 
 function formatEstimate(count: number, withTags: boolean): string {
   // Steam Store: 180 req / 5 min ≈ 1.7s each

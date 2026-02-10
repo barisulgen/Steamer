@@ -64,32 +64,6 @@ export async function getAppDetails(
   }
 }
 
-export async function getAppDetailsBatch(
-  appids: number[],
-  onProgress?: (completed: number, total: number, failed: number) => void
-): Promise<Map<number, SteamAppDetails>> {
-  const results = new Map<number, SteamAppDetails>();
-  let completed = 0;
-  let failed = 0;
-
-  for (const appid of appids) {
-    try {
-      const details = await getAppDetails(appid);
-      if (details) {
-        results.set(appid, details);
-      } else {
-        failed++;
-      }
-    } catch {
-      failed++;
-    }
-    completed++;
-    onProgress?.(completed, appids.length, failed);
-  }
-
-  return results;
-}
-
 // ===== SteamSpy API =====
 
 export async function getSteamSpyApp(
@@ -128,6 +102,54 @@ export async function getSteamSpyBulk(
   return Object.values(json);
 }
 
+// ===== Wikidata API (company websites) =====
+
+const wikidataWebsiteCache = new LRUCache<string>(5000);
+
+export async function getCompanyWebsite(
+  companyName: string
+): Promise<string> {
+  if (!companyName) return "";
+
+  const cached = wikidataWebsiteCache.get(companyName);
+  if (cached !== undefined) return cached;
+
+  try {
+    // Search for the entity by name
+    const searchRes = await fetch(
+      `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(companyName)}&language=en&type=item&limit=1&format=json`
+    );
+    if (!searchRes.ok) {
+      wikidataWebsiteCache.set(companyName, "");
+      return "";
+    }
+    const searchData = await searchRes.json();
+    const entityId = searchData.search?.[0]?.id;
+    if (!entityId) {
+      wikidataWebsiteCache.set(companyName, "");
+      return "";
+    }
+
+    // Get official website (P856)
+    const claimsRes = await fetch(
+      `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entityId}&property=P856&format=json`
+    );
+    if (!claimsRes.ok) {
+      wikidataWebsiteCache.set(companyName, "");
+      return "";
+    }
+    const claimsData = await claimsRes.json();
+    const website =
+      claimsData.claims?.P856?.[0]?.mainsnak?.datavalue?.value ?? "";
+
+    wikidataWebsiteCache.set(companyName, website);
+    return website;
+  } catch {
+    wikidataWebsiteCache.set(companyName, "");
+    return "";
+  }
+}
+
 // ===== Normalization =====
 
 export function normalizeStoreDetails(d: SteamAppDetails): GameEntry {
@@ -158,6 +180,9 @@ export function normalizeStoreDetails(d: SteamAppDetails): GameEntry {
     positiveReviews: null,
     negativeReviews: null,
     averagePlaytime: null,
+    websiteUrl: d.website ?? "",
+    developerWebsite: "",
+    publisherWebsite: "",
     detailLevel: "full",
   };
 }
@@ -197,6 +222,9 @@ export function normalizeSteamSpyData(d: SteamSpyAppData): GameEntry {
     positiveReviews: d.positive,
     negativeReviews: d.negative,
     averagePlaytime: d.average_forever,
+    websiteUrl: "",
+    developerWebsite: "",
+    publisherWebsite: "",
     detailLevel: "steamspy",
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchPanel } from "@/components/SearchPanel";
 import { BrowsePanel } from "@/components/BrowsePanel";
@@ -28,10 +28,11 @@ export default function Home() {
   } = useGameData();
 
   const allAppIds = useMemo(() => games.map((g) => g.appid), [games]);
+  const [selectedAppIds, setSelectedAppIds] = useState<number[]>([]);
 
-  // Derive selected app IDs from the table's row selection
-  // This is managed inside GameTable, but for BrowsePanel we pass all IDs
-  const selectedAppIds: number[] = [];
+  const handleSelectionChange = useCallback((ids: number[]) => {
+    setSelectedAppIds(ids);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,7 +133,7 @@ export default function Home() {
 
         {/* Data Table */}
         <div className="rounded-xl border border-border/50 bg-card p-4">
-          <GameTable data={filteredGames} onUpdateGame={updateGame} />
+          <GameTable data={filteredGames} onUpdateGame={updateGame} onSelectionChange={handleSelectionChange} />
         </div>
       </main>
     </div>

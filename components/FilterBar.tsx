@@ -13,20 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { SearchFilters, GameEntry } from "@/types/steam";
-
-const STEAM_GENRES = [
-  "Action", "Adventure", "Casual", "Early Access", "Free to Play",
-  "Indie", "Massively Multiplayer", "RPG", "Racing", "Simulation",
-  "Sports", "Strategy",
-];
-
-const COMMON_TAGS = [
-  "Singleplayer", "Multiplayer", "Co-op", "Online Co-Op",
-  "Open World", "Survival", "Sandbox", "VR", "2D", "3D",
-  "FPS", "Third Person", "Puzzle", "Platformer", "Horror",
-  "Roguelike", "Turn-Based", "Story Rich", "Atmospheric",
-  "Pixel Graphics", "Anime", "Sci-fi", "Fantasy", "Building",
-];
+import { STEAM_GENRES, COMMON_TAGS } from "@/lib/constants";
 
 interface FilterBarProps {
   filters: SearchFilters;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -37,19 +37,18 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { EditableCell } from "./EditableCell";
 import { ColumnToggle } from "./ColumnToggle";
 import { ExportButton } from "./ExportButton";
-import { formatPrice, formatPlaytime } from "@/lib/utils";
+import { formatPlaytime } from "@/lib/utils";
 import type { GameEntry } from "@/types/steam";
 
 interface GameTableProps {
   data: GameEntry[];
   onUpdateGame: (appid: number, field: string, value: unknown) => void;
+  onSelectionChange?: (selectedIds: number[]) => void;
 }
 
-export function GameTable({ data, onUpdateGame }: GameTableProps) {
+export function GameTable({ data, onUpdateGame, onSelectionChange }: GameTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    shortDescription: false,
-    averagePlaytime: false,
     discountPercent: false,
     platforms: false,
   });
@@ -162,6 +161,90 @@ export function GameTable({ data, onUpdateGame }: GameTableProps) {
           (a.original.publishers[0] ?? "").localeCompare(
             b.original.publishers[0] ?? ""
           ),
+        size: 160,
+      },
+      {
+        accessorKey: "websiteUrl",
+        header: "Game Website",
+        cell: ({ row }) => {
+          const url = row.original.websiteUrl;
+          if (url) {
+            return (
+              <a
+                href={url.startsWith("http") ? url : `https://${url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline text-xs truncate block max-w-[160px]"
+                title={url}
+              >
+                {url.replace(/^https?:\/\/(www\.)?/, "")}
+              </a>
+            );
+          }
+          return (
+            <EditableCell
+              value=""
+              onSave={(v) => onUpdateGame(row.original.appid, "websiteUrl", v)}
+            />
+          );
+        },
+        enableSorting: false,
+        size: 160,
+      },
+      {
+        accessorKey: "developerWebsite",
+        header: "Dev Website",
+        cell: ({ row }) => {
+          const url = row.original.developerWebsite;
+          if (url) {
+            return (
+              <a
+                href={url.startsWith("http") ? url : `https://${url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline text-xs truncate block max-w-[160px]"
+                title={url}
+              >
+                {url.replace(/^https?:\/\/(www\.)?/, "")}
+              </a>
+            );
+          }
+          return (
+            <EditableCell
+              value=""
+              onSave={(v) => onUpdateGame(row.original.appid, "developerWebsite", v)}
+            />
+          );
+        },
+        enableSorting: false,
+        size: 160,
+      },
+      {
+        accessorKey: "publisherWebsite",
+        header: "Pub Website",
+        cell: ({ row }) => {
+          const url = row.original.publisherWebsite;
+          if (url) {
+            return (
+              <a
+                href={url.startsWith("http") ? url : `https://${url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline text-xs truncate block max-w-[160px]"
+                title={url}
+              >
+                {url.replace(/^https?:\/\/(www\.)?/, "")}
+              </a>
+            );
+          }
+          return (
+            <EditableCell
+              value=""
+              onSave={(v) => onUpdateGame(row.original.appid, "publisherWebsite", v)}
+            />
+          );
+        },
+        enableSorting: false,
         size: 160,
       },
       {
@@ -407,6 +490,10 @@ export function GameTable({ data, onUpdateGame }: GameTableProps) {
     });
     return ids;
   }, [rowSelection]);
+
+  useEffect(() => {
+    onSelectionChange?.(Array.from(selectedAppIds));
+  }, [selectedAppIds, onSelectionChange]);
 
   return (
     <div className="space-y-3">

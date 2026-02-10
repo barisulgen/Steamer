@@ -43,6 +43,8 @@ export function useGameData(): UseGameDataReturn {
   } | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({});
   const enrichAbortRef = useRef<AbortController | null>(null);
+  const gamesRef = useRef(games);
+  gamesRef.current = games;
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
@@ -168,11 +170,23 @@ export function useGameData(): UseGameDataReturn {
 
     setProgress({ completed: 0, total: appids.length, failed: 0 });
 
+    // Build a names map so the server can do Wikidata lookups even when Store API fails
+    const names: Record<number, { developer: string; publisher: string }> = {};
+    for (const id of appids) {
+      const game = gamesRef.current.find((g) => g.appid === id);
+      if (game) {
+        names[id] = {
+          developer: game.developers[0] ?? "",
+          publisher: game.publishers[0] ?? "",
+        };
+      }
+    }
+
     try {
       const res = await fetch(`/api/apps/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: appids, withTags }),
+        body: JSON.stringify({ ids: appids, withTags, names }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
@@ -212,7 +226,21 @@ export function useGameData(): UseGameDataReturn {
                     positiveReviews: enriched.positiveReviews ?? g.positiveReviews,
                     negativeReviews: enriched.negativeReviews ?? g.negativeReviews,
                     averagePlaytime: enriched.averagePlaytime ?? g.averagePlaytime,
+                    websiteUrl: enriched.websiteUrl || g.websiteUrl,
+                    developerWebsite: enriched.developerWebsite || g.developerWebsite,
+                    publisherWebsite: enriched.publisherWebsite || g.publisherWebsite,
                     detailLevel: "full" as const,
+                  };
+                })
+              );
+            } else if (event.type === "websites") {
+              setGames((prev) =>
+                prev.map((g) => {
+                  if (g.appid !== event.appid) return g;
+                  return {
+                    ...g,
+                    developerWebsite: event.developerWebsite || g.developerWebsite,
+                    publisherWebsite: event.publisherWebsite || g.publisherWebsite,
                   };
                 })
               );

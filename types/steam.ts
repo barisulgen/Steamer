@@ -59,6 +59,7 @@ export interface SteamAppDetails {
   recommendations?: {
     total: number;
   };
+  website?: string;
 }
 
 /** SteamSpy API response for a single app */
@@ -117,6 +118,9 @@ export interface GameEntry {
   positiveReviews: number | null;
   negativeReviews: number | null;
   averagePlaytime: number | null;
+  websiteUrl: string;
+  developerWebsite: string;
+  publisherWebsite: string;
   detailLevel: "minimal" | "steamspy" | "full";
 }
 
@@ -145,22 +149,3 @@ export type BrowseMode =
   | { type: "genre"; genre: string }
   | { type: "tag"; tag: string };
 
-/** API route response shape */
-export interface ApiResponse<T> {
-  data: T;
-  meta?: {
-    total?: number;
-    fetched?: number;
-    cached?: number;
-    errors?: string[];
-  };
-}
-
-/** For streaming progress updates during bulk fetch */
-export interface FetchProgress {
-  total: number;
-  completed: number;
-  failed: number;
-  currentAppId?: number;
-  currentAppName?: string;
-}

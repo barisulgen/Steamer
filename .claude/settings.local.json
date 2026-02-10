@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://api.rawg.io/api/developers/1612?key=e26f5be3ca224171bf280ca66c5458f1\")",
+      "Bash(curl -s \"https://api.rawg.io/api/games?key=e26f5be3ca224171bf280ca66c5458f1&search=counter-strike+2&page_size=1\")",
+      "Bash(node -e \"const chunks=[]; process.stdin.on\\(''data'',c=>chunks.push\\(c\\)\\); process.stdin.on\\(''end'',\\(\\)=>{const d=JSON.parse\\(chunks.join\\(''''\\)\\); const g=d.results?.[0]; console.log\\(JSON.stringify\\({id:g?.id,name:g?.name,slug:g?.slug},null,2\\)\\)}\\)\")"
+    ]
+  }
+}
