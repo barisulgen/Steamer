@@ -38,7 +38,12 @@ export default function Home() {
       {/* Top nav bar */}
       <header className="sticky top-0 z-40 border-b border-border/50 bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto max-w-[1600px] px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <img
+              src="/steamer-logo.png"
+              alt="Steamer"
+              className="h-8 w-8"
+            />
             <h1 className="text-lg font-semibold tracking-tight text-foreground">
               Steamer
             </h1>
