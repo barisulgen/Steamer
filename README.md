@@ -1,5 +1,7 @@
 # Steamer
 
+![steamer-logo](https://github.com/user-attachments/assets/c5bfdb60-5e18-4b78-9149-659c78a391e6)
+
 A single-user web tool for fetching, browsing, filtering, editing, and exporting Steam game data. Built with Next.js, TanStack Table, and shadcn/ui.
 
 ## Features
